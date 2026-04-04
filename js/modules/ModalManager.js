@@ -60,7 +60,7 @@ class ModalManager {
         <div class="modal-card">
           <div class="modal-handle"></div>
           <h2 class="modal-title">记录实际数据</h2>
-          <p class="modal-date">${displayDate} · 目标：<strong>${targetWeight}kg</strong></p>
+          <p class="modal-date">${displayDate} · 目标：<strong id="targetWeightDisplay">${targetWeight}kg</strong> <button class="btn-link" id="editTargetBtn">修改</button></p>
           <div class="form-group">
             <label>实际体重（kg）</label>
             <input type="number" id="actualInput" value="${rec.actualWeight != null ? rec.actualWeight : ''}" placeholder="留空表示未称重" step="0.1" min="20" max="300">
@@ -98,6 +98,13 @@ class ModalManager {
       };
 
       document.getElementById('modalCancel').onclick = () => this.closeModal();
+
+      document.getElementById('editTargetBtn').onclick = () => {
+        this.closeModal();
+        setTimeout(() => {
+          this.showTargetModal(dateStr, targetWeight);
+        }, 50);
+      };
 
       const clearBtn = document.getElementById('modalClear');
       if (clearBtn) {
