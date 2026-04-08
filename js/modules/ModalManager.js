@@ -55,7 +55,7 @@ class ModalManager {
       (rec.skinCare && rec.skinCare.trim())
     );
 
-    const targetText = targetWeight != null ? `<strong>${targetWeight}kg</strong>` : '未设置';
+    const targetText = targetWeight != null ? `<strong id="targetWeightDisplay">${targetWeight}kg</strong> <button class="btn-link" id="editTargetBtn">修改</button>` : '未设置';
 
     const html = `
       <div class="modal-overlay" id="modalOverlay">
@@ -100,6 +100,16 @@ class ModalManager {
       };
 
       document.getElementById('modalCancel').onclick = () => this.closeModal();
+
+      const editTargetBtn = document.getElementById('editTargetBtn');
+      if (editTargetBtn) {
+        editTargetBtn.onclick = () => {
+          this.closeModal();
+          setTimeout(() => {
+            this.showTargetModal(dateStr, targetWeight);
+          }, 50);
+        };
+      }
 
       const clearBtn = document.getElementById('modalClear');
       if (clearBtn) {

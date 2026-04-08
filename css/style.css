@@ -372,6 +372,23 @@ body {
   background: #FECACA;
 }
 
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 6px;
+  margin-left: 4px;
+  text-decoration: underline;
+  font-family: var(--font-body);
+}
+
+.btn-link:hover {
+  color: #1e5c3a;
+}
+
 .list-container {
   display: flex;
   flex-direction: column;
