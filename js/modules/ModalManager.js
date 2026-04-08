@@ -55,12 +55,14 @@ class ModalManager {
       (rec.skinCare && rec.skinCare.trim())
     );
 
+    const targetText = targetWeight != null ? `<strong>${targetWeight}kg</strong>` : '未设置';
+
     const html = `
       <div class="modal-overlay" id="modalOverlay">
         <div class="modal-card">
           <div class="modal-handle"></div>
           <h2 class="modal-title">记录实际数据</h2>
-          <p class="modal-date">${displayDate} · 目标：<strong>${targetWeight}kg</strong></p>
+          <p class="modal-date">${displayDate} · 目标：${targetText}</p>
           <div class="form-group">
             <label>实际体重（kg）</label>
             <input type="number" id="actualInput" value="${rec.actualWeight != null ? rec.actualWeight : ''}" placeholder="留空表示未称重" step="0.1" min="20" max="300">

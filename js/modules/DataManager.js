@@ -61,7 +61,6 @@ class DataManager {
   }
 
   setRecord(dateStr, record) {
-    if (!this.store.targets[dateStr]) return false;
     this.store.records[dateStr] = {
       actualWeight: record.actualWeight != null ? parseFloat(record.actualWeight.toFixed(1)) : null,
       exercise: record.exercise || null,
@@ -96,15 +95,60 @@ class DataManager {
     for (const dateStr of Object.keys(this.store.targets).sort()) {
       const target = this.store.targets[dateStr];
       const record = this.store.records[dateStr];
-      if (target && record && record.actualWeight != null) {
-        result.push({
-          date: dateStr,
-          targetWeight: target.targetWeight,
-          actualWeight: record.actualWeight
-        });
-      }
+      result.push({
+        date: dateStr,
+        targetWeight: target.targetWeight,
+        actualWeight: record && record.actualWeight != null ? record.actualWeight : null
+      });
     }
     return result;
+  }
+
+  clearAllTargets() {
+    this.store.targets = {};
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.store));
+      this._emitChange();
+      return true;
+    } catch (e) {
+      console.error('DataManager: Failed to clear targets', e);
+      return false;
+    }
+  }
+
+  clearAllRecords() {
+    this.store.records = {};
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.store));
+      this._emitChange();
+      return true;
+    } catch (e) {
+      console.error('DataManager: Failed to clear records', e);
+      return false;
+    }
+  }
+
+  clearAllData() {
+    this.store = { targets: {}, records: {} };
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      this._emitChange();
+      return true;
+    } catch (e) {
+      console.error('DataManager: Failed to clear data', e);
+      return false;
+    }
+  }
+
+  getAllRecordsSorted() {
+    const allDates = new Set([...Object.keys(this.store.targets), ...Object.keys(this.store.records)]);
+    return Array.from(allDates)
+      .sort()
+      .map(dateStr => ({
+        date: dateStr,
+        target: this.store.targets[dateStr] || null,
+        record: this.store.records[dateStr] || null
+      }));
   }
 }
 

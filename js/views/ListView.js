@@ -8,13 +8,13 @@ class ListView {
   }
 
   render() {
-    const items = DataManager.getAllTargetsSorted().reverse();
+    const items = DataManager.getAllRecordsSorted().reverse();
 
     if (items.length === 0) {
       this.container.innerHTML = `
         <div class="list-empty">
-          <p>还没有设定任何目标</p>
-          <p style="margin-top:8px;font-size:0.85rem;color:#9CA3AF;">在日历中点击日期来添加目标</p>
+          <p>还没有任何记录</p>
+          <p style="margin-top:8px;font-size:0.85rem;color:#9CA3AF;">在日历中点击日期来添加目标或记录</p>
         </div>`;
       return;
     }
@@ -24,6 +24,7 @@ class ListView {
       const displayDate = CalendarEngine.formatDisplayDate(item.date);
       const hasActual = item.record && item.record.actualWeight != null;
       const actualText = hasActual ? `${item.record.actualWeight}kg` : '未记录';
+      const targetText = item.target ? `${item.target.targetWeight}kg` : '未设置';
       const summaryParts = [];
       if (item.record) {
         if (item.record.exercise) summaryParts.push(`动:${item.record.exercise.slice(0, 6)}`);
@@ -36,7 +37,7 @@ class ListView {
         <div class="list-item" data-date="${item.date}">
           <span class="list-item-date">${displayDate}</span>
           <div class="list-item-weights">
-            <span class="list-item-target">目标 ${item.targetWeight}kg</span>
+            <span class="list-item-target">目标 ${targetText}</span>
             <span class="list-item-actual ${hasActual ? '' : 'missing'}">${actualText}</span>
             ${summary ? `<span style="font-size:0.75rem;color:#9CA3AF;margin-top:2px;">${summary}</span>` : ''}
           </div>
@@ -53,9 +54,9 @@ class ListView {
       el.addEventListener('click', () => {
         const dateStr = el.dataset.date;
         const target = DataManager.getTarget(dateStr);
-        if (target) {
-          const record = DataManager.getRecord(dateStr);
-          ModalManager.showRecordModal(dateStr, target.targetWeight, record);
+        const record = DataManager.getRecord(dateStr);
+        if (target || record) {
+          ModalManager.showRecordModal(dateStr, target ? target.targetWeight : null, record);
         }
       });
     });

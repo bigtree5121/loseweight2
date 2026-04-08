@@ -49,7 +49,8 @@ class ChartEngine {
     const chartW = width - padding.left - padding.right;
     const chartH = height - padding.top - padding.bottom;
 
-    const allWeights = points.flatMap(p => [p.targetWeight, p.actualWeight]);
+    const allWeights = points.flatMap(p => [p.targetWeight, p.actualWeight]).filter(w => w != null);
+    if (allWeights.length === 0) return;
     let minW = Math.min(...allWeights);
     let maxW = Math.max(...allWeights);
     const range = maxW - minW || 2;
@@ -57,11 +58,11 @@ class ChartEngine {
     minW -= margin;
     maxW += margin;
 
-    this._drawYAxis(ctx, minW, maxW, padding, chartH);
-    this._drawXAxis(ctx, points, padding, chartW, chartH);
-
     const getX = (i) => padding.left + (points.length === 1 ? chartW / 2 : (i / (points.length - 1)) * chartW);
     const getY = (val) => padding.top + chartH - ((val - minW) / (maxW - minW)) * chartH;
+
+    this._drawYAxis(ctx, minW, maxW, padding, chartH);
+    this._drawXAxis(ctx, points, padding, chartW, chartH);
 
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
@@ -74,11 +75,17 @@ class ChartEngine {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    const actualLine = points.map((p, i) => ({ x: getX(i), y: getY(p.actualWeight) }));
-    ctx.strokeStyle = this.options.colorActual;
-    ctx.beginPath();
-    actualLine.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
-    ctx.stroke();
+    const actualPoints = points.filter(p => p.actualWeight != null);
+    if (actualPoints.length > 0) {
+      const actualLine = actualPoints.map((p, i) => {
+        const index = points.indexOf(p);
+        return { x: getX(index), y: getY(p.actualWeight) };
+      });
+      ctx.strokeStyle = this.options.colorActual;
+      ctx.beginPath();
+      actualLine.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
+      ctx.stroke();
+    }
 
     points.forEach((p, i) => {
       const tx = getX(i);
@@ -89,18 +96,20 @@ class ChartEngine {
       ctx.lineWidth = 1.8;
       ctx.stroke();
 
-      const ax = getX(i);
-      const ay = getY(p.actualWeight);
-      ctx.beginPath();
-      ctx.arc(ax, ay, 4, 0, Math.PI * 2);
-      ctx.fillStyle = this.options.colorActual;
-      ctx.fill();
-
-      if (i === this.hoveredIndex) {
+      if (p.actualWeight != null) {
+        const ax = getX(i);
+        const ay = getY(p.actualWeight);
         ctx.beginPath();
-        ctx.arc(ax, ay, 7, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(44,122,77,0.15)';
+        ctx.arc(ax, ay, 4, 0, Math.PI * 2);
+        ctx.fillStyle = this.options.colorActual;
         ctx.fill();
+
+        if (i === this.hoveredIndex) {
+          ctx.beginPath();
+          ctx.arc(ax, ay, 7, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(44,122,77,0.15)';
+          ctx.fill();
+        }
       }
     });
   }
@@ -176,7 +185,8 @@ class ChartEngine {
     const el = document.createElement('div');
     el.className = 'tooltip-popup';
     el.id = 'chartTooltip';
-    el.innerHTML = `<strong>${point.date}</strong><br>目标: ${point.targetWeight}kg &nbsp; 实际: ${point.actualWeight}kg`;
+    const actualText = point.actualWeight != null ? point.actualWeight : '未记录';
+    el.innerHTML = `<strong>${point.date}</strong><br>目标: ${point.targetWeight}kg &nbsp; 实际: ${actualText}kg`;
     document.body.appendChild(el);
     this._positionTooltip(e, el);
   }

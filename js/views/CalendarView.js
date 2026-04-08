@@ -48,6 +48,11 @@ class CalendarView {
         } else if (target) {
           indicatorHtml = '<div class="day-indicator target-only"></div>';
           weightHint = `<span class="day-weight-hint">${target.targetWeight}</span>`;
+        } else if (hasRecord) {
+          indicatorHtml = '<div class="day-indicator has-record"></div>';
+          if (record.actualWeight != null) {
+            weightHint = `<span class="day-weight-hint">${record.actualWeight}</span>`;
+          }
         }
 
         html += `
@@ -62,8 +67,10 @@ class CalendarView {
 
     html += `
       </div>
-      <div style="text-align:center;margin-top:14px;">
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap;">
         <button class="calendar-nav calendar-today-btn" id="todayBtn">回到今天</button>
+        <button class="calendar-nav calendar-today-btn" id="clearTargetsBtn" style="background:#FEE2E2;color:#DC2626;">清除所有目标</button>
+        <button class="calendar-nav calendar-today-btn" id="clearRecordsBtn" style="background:#FEF3C7;color:#D97706;">清除所有记录</button>
       </div>`;
 
     this.container.innerHTML = html;
@@ -75,9 +82,15 @@ class CalendarView {
       el.addEventListener('click', () => {
         const dateStr = el.dataset.date;
         const target = DataManager.getTarget(dateStr);
-        if (target) {
-          const record = DataManager.getRecord(dateStr);
-          ModalManager.showRecordModal(dateStr, target.targetWeight, record);
+        const record = DataManager.getRecord(dateStr);
+        const hasRecord = record && (
+          record.actualWeight != null ||
+          (record.exercise && record.exercise.trim()) ||
+          (record.diet && record.diet.trim()) ||
+          (record.skinCare && record.skinCare.trim())
+        );
+        if (target || hasRecord) {
+          ModalManager.showRecordModal(dateStr, target ? target.targetWeight : null, record);
         } else {
           ModalManager.showTargetModal(dateStr, null);
         }
@@ -87,10 +100,14 @@ class CalendarView {
     const prevBtn = this.container.querySelector('#prevMonth');
     const nextBtn = this.container.querySelector('#nextMonth');
     const todayBtn = this.container.querySelector('#todayBtn');
+    const clearTargetsBtn = this.container.querySelector('#clearTargetsBtn');
+    const clearRecordsBtn = this.container.querySelector('#clearRecordsBtn');
 
     if (prevBtn) prevBtn.addEventListener('click', () => this._changeMonth(-1));
     if (nextBtn) nextBtn.addEventListener('click', () => this._changeMonth(1));
     if (todayBtn) todayBtn.addEventListener('click', () => this._goToday());
+    if (clearTargetsBtn) clearTargetsBtn.addEventListener('click', this._handleClearTargets.bind(this));
+    if (clearRecordsBtn) clearRecordsBtn.addEventListener('click', this._handleClearRecords.bind(this));
   }
 
   _changeMonth(delta) {
@@ -106,6 +123,20 @@ class CalendarView {
     this.currentMonth = t.getMonth();
     this.render();
   }
-}
+
+  _handleClearTargets() {
+    if (confirm('确定要清除所有目标体重吗？此操作不会影响实际记录，不可撤销。')) {
+      DataManager.clearAllTargets();
+      this.render();
+    }
+  }
+
+  _handleClearRecords() {
+    if (confirm('确定要清除所有实际记录吗？此操作不会影响目标体重，不可撤销。')) {
+      DataManager.clearAllRecords();
+      this.render();
+    }
+  }
+} 
 
 export default CalendarView;

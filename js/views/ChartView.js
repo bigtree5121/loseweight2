@@ -14,8 +14,8 @@ class ChartView {
       this.container.innerHTML = `
         <div class="chart-container">
           <div class="chart-empty">
-            <p>暂无实际体重数据</p>
-            <p style="margin-top:8px;font-size:0.85rem;">请在日历中记录体重后查看曲线对比</p>
+            <p>暂无目标体重数据</p>
+            <p style="margin-top:8px;font-size:0.85rem;">请在日历中设置目标体重后查看曲线</p>
           </div>
         </div>`;
       return;
