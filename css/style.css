@@ -2,8 +2,8 @@
   --bg: #FAFAF8;
   --fg: #1A1A1A;
   --muted: #6B7280;
-  --accent: #2C7A4D;
-  --accent-light: #E8F5EC;
+  --accent: #3B82F6;
+  --accent-light: #DBEAFE;
   --card: #FFFFFF;
   --border: #E5E5E0;
   --target-dot: #9CA3AF;
@@ -192,6 +192,11 @@ body {
 
 .calendar-day.other-month {
   opacity: 0.3;
+}
+
+.calendar-day.today {
+  background: var(--accent-light);
+  border-radius: var(--radius);
 }
 
 .calendar-day.today .day-num {
